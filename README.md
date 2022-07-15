@@ -1,5 +1,9 @@
 # Azure DevOps
 
+This is partial code forked from ned1313/terraform-tuesdays. The following README is from that repo.
+
+-------------------------
+
 This is the beginning of a multi-part series looking into deploying Terraform using Azure DevOps. There are several goals I want to accomplish in this project.
 
 1. Create a pipeline in Azure DevOps using YAML
