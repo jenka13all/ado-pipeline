@@ -24,13 +24,7 @@ variable "ado_github_pat" {
 variable "prefix" {
   type        = string
   description = "Naming prefix for resources"
-  default     = "ado-pipeline"
-}
-
-variable "prefix_storage" {
-  type        = string
-  description = "Nameing prefix for STORAGE account"
-  default = "adopipeline"
+  default     = "adopipe"
 }
 
 variable "az_location" {
@@ -62,7 +56,7 @@ locals {
   ado_pipeline_name_1     = "${var.prefix}-pipeline-1"
 
   az_resource_group_name  = "${var.prefix}${random_integer.suffix.result}"
-  az_storage_account_name = "${lower(var.prefix_storage)}${random_integer.suffix.result}"
+  az_storage_account_name = "${lower(var.prefix)}${random_integer.suffix.result}"
   az_key_vault_name = "${var.prefix}${random_integer.suffix.result}"
 
   pipeline_variables = {
