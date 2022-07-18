@@ -18,13 +18,12 @@ resource "azuread_service_principal" "service_connection" {
 
 # azuread >= 2.0 generates passwords automatically
 # this is used in azuredevops.tf
-resource "random_password" "service_connection" {
-  length = 16
-}
+#resource "random_password" "service_connection" {
+#  length = 16
+#}
 
 resource "azuread_service_principal_password" "service_connection" {
   service_principal_id = azuread_service_principal.service_connection.object_id
-  value = random_password.service_connection.result
 }
 
 # Create SP for creation of Azure resources in selected subscription.
@@ -40,13 +39,12 @@ resource "azuread_service_principal" "resource_creation" {
 
 # azuread >= 2.0 generates passwords automatically
 # this is used in variables.tf
-resource "random_password" "resource_creation" {
-  length = 16
-}
+#resource "random_password" "resource_creation" {
+#  length = 16
+#}
 
 resource "azuread_service_principal_password" "resource_creation" {
   service_principal_id = azuread_service_principal.resource_creation.object_id
-  value = random_password.resource_creation.result
 }
 
 resource "azurerm_role_assignment" "resource_creation" {
