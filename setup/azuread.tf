@@ -16,12 +16,6 @@ resource "azuread_service_principal" "service_connection" {
   application_id               = azuread_application.service_connection.application_id
 }
 
-# azuread >= 2.0 generates passwords automatically
-# this is used in azuredevops.tf
-#resource "random_password" "service_connection" {
-#  length = 16
-#}
-
 resource "azuread_service_principal_password" "service_connection" {
   service_principal_id = azuread_service_principal.service_connection.object_id
 }
@@ -36,12 +30,6 @@ resource "azuread_application" "resource_creation" {
 resource "azuread_service_principal" "resource_creation" {
   application_id               = azuread_application.resource_creation.application_id
 }
-
-# azuread >= 2.0 generates passwords automatically
-# this is used in variables.tf
-#resource "random_password" "resource_creation" {
-#  length = 16
-#}
 
 resource "azuread_service_principal_password" "resource_creation" {
   service_principal_id = azuread_service_principal.resource_creation.object_id
