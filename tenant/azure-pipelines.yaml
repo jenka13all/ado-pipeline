@@ -3,6 +3,7 @@
 variables:
 - group: ado-pipeline
 
+# when there's a change in the "tenant" folder pushed/merged into main branch
 trigger:
   branches:
     include:
@@ -19,10 +20,10 @@ stages:
     pool:
       vmImage: ubuntu-latest
     steps:
-    - task: TerraformInstaller@0
-      displayName: Install Terraform
-      inputs:
-        terraformVersion: 'latest'
+    # Install Checkov
+    - bash: pip3 install checkov
+      displayName: 'Install checkov'
+      name: 'install_checkov'
 
     # Azure Key Vault
     # Download Azure Key Vault secrets
@@ -50,6 +51,43 @@ stages:
       inputs:
         command: 'validate'
         workingDirectory: '$(System.DefaultWorkingDirectory)/tenant'
+
+  # Verify module files with Checkov
+    - bash: checkov --directory $(System.DefaultWorkingDirectory)/tenant/.terraform --skip-check CKV_DOCKER_* -o junitxml > $(System.DefaultWorkingDirectory)/Checkov-Module-Report.xml
+      displayName: 'Verify modules with Checkov'
+      name: 'checkov_module_check'
+
+  # Publish test results for modules
+  # Shout out to Adin Ermie for this one! https://adinermie.com/publishing-checkov-terraform-quality-checks-to-azure-devops-pipelines/
+    - task: PublishTestResults@2
+      displayName: Publish Checkov Module Test Results
+      condition: succeededOrFailed()
+      inputs:
+        testResultsFormat: 'JUnit'
+        testResultsFiles: '**/*Checkov-Module-Report.xml'
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        mergeTestResults: false
+        testRunTitle: Checkov Module Scan
+        failTaskOnFailedTests: false
+        publishRunAttachments: true
+
+  # Verify main files with Checkov
+    - bash: checkov --directory $(System.DefaultWorkingDirectory)/tenant -o junitxml > $(System.DefaultWorkingDirectory)/Checkov-Root-Report.xml
+      displayName: 'Verify root module with Checkov'
+      name: 'checkov_root_check'
+
+  # Publish test results for root module
+    - task: PublishTestResults@2
+      displayName: Publish Checkov Root Test Results
+      condition: succeededOrFailed()
+      inputs:
+        testResultsFormat: 'JUnit'
+        testResultsFiles: '**/*Checkov-Root-Report.xml'
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        mergeTestResults: false
+        testRunTitle: Checkov Root Scan
+        failTaskOnFailedTests: false
+        publishRunAttachments: true
     
 - stage: Plan
   displayName: Plan
@@ -58,10 +96,10 @@ stages:
     pool:
       vmImage: ubuntu-latest
     steps:
-    - task: TerraformInstaller@0
-      displayName: Install Terraform
-      inputs:
-        terraformVersion: 'latest'
+    # Install Checkov
+    - bash: pip3 install checkov
+      displayName: 'Install checkov'
+      name: 'install_checkov'
 
     # Azure Key Vault
     # Download Azure Key Vault secrets
@@ -92,9 +130,41 @@ stages:
         ARM_CLIENT_SECRET: $(az-client-secret)
         ARM_SUBSCRIPTION_ID: $(az-subscription)
         ARM_TENANT_ID: $(az-tenant)
+  # save plan to a file, main.tfplan, in our tenant directory
       inputs:
         command: 'plan'
         workingDirectory: '$(System.DefaultWorkingDirectory)/tenant'
+        commandOptions: '-out=$(System.DefaultWorkingDirectory)/tenant/main.tfplan'
+        publishPlanResults: 'Terraform Plan'
+
+  # Verify plan with Checkov
+  # need to convert tfplan file to json
+    - bash: |
+        cd $(System.DefaultWorkingDirectory)/tenant
+        ls
+        terraform show -json main.tfplan > $(System.DefaultWorkingDirectory)/main.json
+        checkov -f $(System.DefaultWorkingDirectory)/main.json -o junitxml > $(System.DefaultWorkingDirectory)/Checkov-Plan-Report.xml
+      displayName: 'Verify plan with Checkov'
+      name: 'checkov_plan_check'
+      env:
+        ARM_SAS_TOKEN: $(sas-token)
+        ARM_CLIENT_ID: $(az-client-id)
+        ARM_CLIENT_SECRET: $(az-client-secret)
+        ARM_SUBSCRIPTION_ID: $(az-subscription)
+        ARM_TENANT_ID: $(az-tenant)
+
+  # Publish test results for plan
+    - task: PublishTestResults@2
+      displayName: Publish Checkov Plan Test Results
+      condition: succeededOrFailed()
+      inputs:
+        testResultsFormat: 'JUnit'
+        testResultsFiles: '**/*Checkov-Plan-Report.xml'
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        mergeTestResults: false
+        testRunTitle: Checkov Plan Scan
+        failTaskOnFailedTests: false
+        publishRunAttachments: true
 
 # Approve
 - stage: Approve
@@ -107,7 +177,7 @@ stages:
     - task: ManualValidation@0
       timeoutInMinutes: 60
       inputs:
-        notifyUsers: 'jenka13all@gmail.com'
+        notifyUsers: 'ned@nedinthecloud.com'
         instructions: 'Review the plan in the next hour'
 
 - stage: Apply
@@ -117,10 +187,6 @@ stages:
     pool:
       vmImage: ubuntu-latest
     steps:
-    - task: TerraformInstaller@0
-      displayName: Install Terraform
-      inputs:
-        terraformVersion: 'latest'
 
     # Azure Key Vault
     # Download Azure Key Vault secrets
