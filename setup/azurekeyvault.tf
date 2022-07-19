@@ -10,10 +10,10 @@ resource "azurerm_key_vault" "setup" {
   tenant_id = data.azurerm_client_config.current.tenant_id
   sku_name = "standard"
   purge_protection_enabled = true
-  network_acls {
-    default_action = "Deny"
-    bypass = "AzureServices" 
-  }
+  #network_acls {
+  #  default_action = "Deny"
+  #  bypass = "AzureServices" 
+  #}
 }
 
 # Set access policies
