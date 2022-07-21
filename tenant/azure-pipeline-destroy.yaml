@@ -1,4 +1,4 @@
-#Azure DevOps pipeline to destroy all resources
+#Azure DevOps pipeline to destroy all resources from plan file
 
 variables:
 - group: ado-pipeline
