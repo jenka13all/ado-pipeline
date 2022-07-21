@@ -1,0 +1,53 @@
+#Azure DevOps pipeline to destroy all resources
+
+variables:
+- group: ado-pipeline
+
+- stage: Destroy
+  displayName: Destroy
+  jobs:
+  - job: destroy
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+
+    # Install Terraform based on version variable
+    - task: TerraformInstaller@0
+      displayName: Install Terraform
+      inputs:
+        terraformVersion: $(terraform_version)
+
+    # Azure Key Vault
+    # Download Azure Key Vault secrets
+    - task: AzureKeyVault@1
+      inputs:
+        ConnectedServiceName: $(service_name)
+        keyVaultName: $(key_vault_name)
+        secretsFilter: '*'
+        runAsPreJob: false # Azure DevOps Services only
+
+  # Init
+    - task: TerraformCLI@0
+      displayName: Initialize Terraform
+      env:
+        ARM_SAS_TOKEN: $(sas-token)
+      inputs:
+        command: 'init'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/tenant'
+        commandOptions: '-backend-config=storage_account_name=$(storageaccount) -backend-config=container_name=$(container-name) -backend-config=key=$(key)'
+        backendType: 'selfConfigured'
+
+  # Destroy
+    - task: TerraformCLI@0
+      displayName: Terraform Destroy
+      env:
+        ARM_SAS_TOKEN: $(sas-token)
+        ARM_CLIENT_ID: $(az-client-id)
+        ARM_CLIENT_SECRET: $(az-client-secret)
+        ARM_SUBSCRIPTION_ID: $(az-subscription)
+        ARM_TENANT_ID: $(az-tenant)
+      inputs:
+        command: 'destroy'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/tenant'
+        commandOptions: '$(Pipeline.Workspace)/main.tfplan'
+
