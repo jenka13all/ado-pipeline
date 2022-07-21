@@ -54,13 +54,29 @@ resource "azuredevops_variable_group" "variablegroup" {
     value = local.az_key_vault_name
   }
 
+    variable {
+    name  = "project_id"
+    value = azuredevops_project.project.id
+  }
+
+  variable {
+    name  = "pr_pipeline_id"
+    value = azuredevops_build_definition.pipelines["pr"].id
+  }
+
+  variable {
+    name  = "terraform_version"
+    value = var.ado_terraform_version
+  }
+
 }
 
-resource "azuredevops_build_definition" "pipeline_1" {
+resource "azuredevops_build_definition" "pipelines" {
+  for_each = var.ado_pipeline_yaml_paths
 
   depends_on = [azuredevops_resource_authorization.auth]
   project_id = azuredevops_project.project.id
-  name       = local.ado_pipeline_name_1
+  name       = "${each.key} pipeline"
 
   ci_trigger {
     use_yaml = true
@@ -70,7 +86,7 @@ resource "azuredevops_build_definition" "pipeline_1" {
     repo_type             = "GitHub"
     repo_id               = var.ado_github_repo
     branch_name           = "main"
-    yml_path              = var.ado_pipeline_yaml_path_1
+    yml_path              = each.value
     service_connection_id = azuredevops_serviceendpoint_github.serviceendpoint_github.id
   }
 

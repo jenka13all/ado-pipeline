@@ -9,16 +9,26 @@ variable "ado_github_repo" {
   default     = "jenka13all/ado-pipeline"
 }
 
-variable "ado_pipeline_yaml_path_1" {
-  type        = string
-  description = "Path to the yaml for the first pipeline"
-  default     = "tenant/azure-pipelines.yaml"
+variable "ado_pipeline_yaml_paths" {
+  type        = map(string)
+  description = "Path to the yaml for the pipelines"
+  default = {
+    ci    = "tenant/azure-pipeline-checkin.yaml"
+    pr    = "tenant/azure-pipeline-pr.yaml"
+    merge = "tenant/azure-pipeline-merge.yaml"
+  }
 }
 
 variable "ado_github_pat" {
   type        = string
   description = "Personal authentication token for GitHub repo"
   sensitive   = true
+}
+
+variable "ado_terraform_version" {
+  type        = string
+  description = "Version of Terraform to use in the pipeline"
+  default     = "1.2.5"
 }
 
 variable "prefix" {
