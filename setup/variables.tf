@@ -16,6 +16,7 @@ variable "ado_pipeline_yaml_paths" {
     ci    = "tenant/azure-pipeline-checkin.yaml"
     pr    = "tenant/azure-pipeline-pr.yaml"
     merge = "tenant/azure-pipeline-merge.yaml"
+    destry = "tenant/azure-pipeline-destroy.yaml"
   }
 }
 
