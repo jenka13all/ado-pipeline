@@ -23,4 +23,5 @@ terraform {
     workspaces {
       name = "ado-pipeline-setup"
     }
+  }
 }
