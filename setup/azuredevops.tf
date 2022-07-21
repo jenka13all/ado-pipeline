@@ -54,7 +54,7 @@ resource "azuredevops_variable_group" "variablegroup" {
     value = local.az_key_vault_name
   }
 
-    variable {
+  variable {
     name  = "project_id"
     value = azuredevops_project.project.id
   }

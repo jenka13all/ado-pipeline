@@ -3,6 +3,7 @@
 variables:
 - group: ado-pipeline
 
+stages:
 - stage: Destroy
   displayName: Destroy
   jobs:

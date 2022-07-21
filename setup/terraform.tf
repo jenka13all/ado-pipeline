@@ -17,11 +17,7 @@ terraform {
     }
 
   }
-  cloud {
-    organization = "jenka13all"
-
-    workspaces {
-      name = "ado-pipeline-setup"
-    }
+  backend "local" {
+    path = "../tfstate/test_framework.tfstate"
   }
 }
