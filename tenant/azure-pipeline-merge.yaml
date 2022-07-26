@@ -30,7 +30,7 @@ stages:
       inputs:
         source: 'specific'
         project: $(project_id)
-        pipeline: 33
+        pipeline: $(pr_pipeline_id)
         artifact: PlanFile
     # Azure Key Vault
     # Download Azure Key Vault secrets
