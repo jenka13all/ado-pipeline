@@ -8,20 +8,20 @@ resource "azurerm_resource_group" "setup" {
 }
 
 resource "azurerm_storage_account" "sa" {
-  name                     = local.az_storage_account_name
-  resource_group_name      = azurerm_resource_group.setup.name
-  location                 = var.az_location
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
-  min_tls_version          = "TLS1_2"
+  name                      = local.az_storage_account_name
+  resource_group_name       = azurerm_resource_group.setup.name
+  location                  = var.az_location
+  account_tier              = "Standard"
+  account_replication_type  = "LRS"
+  min_tls_version           = "TLS1_2"
   enable_https_traffic_only = true
-  queue_properties  {
+  queue_properties {
     logging {
-        delete                = true
-        read                  = true
-        write                 = true
-        version               = "1.0"
-        retention_policy_days = 10
+      delete                = true
+      read                  = true
+      write                 = true
+      version               = "1.0"
+      retention_policy_days = 10
     }
   }
 
@@ -62,7 +62,7 @@ data "azurerm_storage_account_sas" "state" {
     create  = true
     update  = false
     process = false
-    filter = false
-    tag = false
+    filter  = false
+    tag     = false
   }
 }
