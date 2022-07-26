@@ -50,11 +50,11 @@ resource "azuredevops_variable_group" "variablegroup" {
   }
 
   variable {
-    name = "key_vault_name"
+    name  = "key_vault_name"
     value = local.az_key_vault_name
   }
 
-    variable {
+  variable {
     name  = "project_id"
     value = azuredevops_project.project.id
   }
@@ -97,17 +97,17 @@ resource "azuredevops_build_definition" "pipelines" {
 ## https://registry.terraform.io/providers/microsoft/azuredevops/latest/docs/resources/serviceendpoint_azurerm
 
 resource "azuredevops_serviceendpoint_azurerm" "key_vault" {
-  project_id = azuredevops_project.project.id
+  project_id            = azuredevops_project.project.id
   service_endpoint_name = "key_vault"
-  description = "Azure Service Endpoint for Key Vault Access"
+  description           = "Azure Service Endpoint for Key Vault Access"
 
   credentials {
-    serviceprincipalid = azuread_application.service_connection.application_id
+    serviceprincipalid  = azuread_application.service_connection.application_id
     serviceprincipalkey = azuread_service_principal_password.service_connection.value
   }
 
-  azurerm_spn_tenantid = data.azurerm_client_config.current.tenant_id
-  azurerm_subscription_id = data.azurerm_client_config.current.subscription_id
+  azurerm_spn_tenantid      = data.azurerm_client_config.current.tenant_id
+  azurerm_subscription_id   = data.azurerm_client_config.current.subscription_id
   azurerm_subscription_name = data.azurerm_subscription.current.display_name
 }
 

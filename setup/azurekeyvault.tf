@@ -4,16 +4,12 @@ data "azurerm_subscription" "current" {}
 
 # Create a Key Vault
 resource "azurerm_key_vault" "setup" {
-  name = local.az_key_vault_name
-  location = azurerm_resource_group.setup.location
-  resource_group_name = azurerm_resource_group.setup.name
-  tenant_id = data.azurerm_client_config.current.tenant_id
-  sku_name = "standard"
+  name                     = local.az_key_vault_name
+  location                 = azurerm_resource_group.setup.location
+  resource_group_name      = azurerm_resource_group.setup.name
+  tenant_id                = data.azurerm_client_config.current.tenant_id
+  sku_name                 = "standard"
   purge_protection_enabled = true
-  #network_acls {
-  #  default_action = "Deny"
-  #  bypass = "AzureServices" 
-  #}
 }
 
 # Set access policies
@@ -55,10 +51,10 @@ resource "azurerm_key_vault_secret" "pipeline" {
   depends_on = [
     azurerm_key_vault_access_policy.you
   ]
-  for_each = local.pipeline_variables
-  name         = each.key
-  value        = each.value
-  key_vault_id = azurerm_key_vault.setup.id
-  content_type = "secret"
+  for_each        = local.pipeline_variables
+  name            = each.key
+  value           = each.value
+  key_vault_id    = azurerm_key_vault.setup.id
+  content_type    = "secret"
   expiration_date = "2022-12-30T20:00:00Z"
 }
